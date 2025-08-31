@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette | Умный парсинг</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #7c4dff;
+            --accent-hover: #9c75ff;
+            --success: #00c853;
+            --error: #ff5252;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+
+        .input-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .input-container {
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            resize: vertical;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            font-family: 'Fira Code', monospace;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.2);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .input-example {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-top: 2rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .example-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .example-content {
+            font-family: 'Fira Code', monospace;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .format-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .format-tag {
+            background: rgba(124, 77, 255, 0.2);
+            color: var(--accent);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .color-item {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .color-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .color-box {
+            height: 160px;
+            width: 100%;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .color-box:hover {
+            height: 180px;
+        }
+
+        .color-copy {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .color-box:hover .color-copy {
+            opacity: 1;
+        }
+
+        .color-info {
+            padding: 1.2rem;
+        }
+
+        .color-name {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 1.1rem;
+        }
+
+        .color-value {
+            color: var(--text-secondary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
+        .format-instructions {
+            margin: 1.5rem 0;
+            line-height: 1.8;
+        }
+
+        .format-instructions li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .format-instructions i {
+            color: var(--accent);
+            margin-top: 0.2rem;
+        }
+
+        .format-example {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin: 1.5rem 0;
+            font-family: 'Fira Code', monospace;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            background: var(--success);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 968px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .colors-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-actions {
+                flex-direction: column;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Color Palette</h1>
+            <div class="header-controls">
+                <button class="btn" id="helpBtn">
+                    <i class="fas fa-question-circle"></i> Формат данных
+                </button>
+                <button class="btn btn-primary" id="clearBtn">
+                    <i class="fas fa-broom"></i> Очистить всё
+                </button>
+            </div>
+        </header>
+        
+        <div class="main-layout">
+            <section class="input-section">
+                <h2>Ввод цветов</h2>
+                <div class="input-container">
+                    <textarea id="colorInput" placeholder="Введите цвета в любом формате:&#10;&#10;• #111111 #ffffff #ff0000&#10;• #111, #fff, #f00&#10;• #111 #fff #f00&#10;• Синий: #3498db&#10;• Красный: #e74c3c"></textarea>
+                </div>
+                
+                <div class="input-actions">
+                    <button class="btn btn-primary" id="processBtn">
+                        <i class="fas fa-sync-alt"></i> Обновить палитру
+                    </button>
+                </div>
+                
+                <div class="input-example">
+                    <div class="example-title">
+                        <i class="fas fa-lightbulb"></i> Поддерживаемые форматы
+                    </div>
+                    <div class="example-content">#111111 #ffffff #ff0000
+#111, #fff, #f00
+#111 #fff #f00
+
+Синий: #3498db
+Красный: #e74c3c
+Зеленый: #2ecc71</div>
+                    
+                    <div class="format-tags">
+                        <span class="format-tag">HEX коды</span>
+                        <span class="format-tag">Пробелы</span>
+                        <span class="format-tag">Запятые</span>
+                        <span class="format-tag">Переносы строк</span>
+                        <span class="format-tag">Названия</span>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="colors-grid" id="colorsContainer">
+                <div class="empty-state">
+                    <i class="fas fa-palette"></i>
+                    <p>Введите данные о цветах и нажмите "Обновить палитру"</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Color Palette | Умный парсинг цветовых палитр</p>
+        </footer>
+    </div>
+    
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Формат данных</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="format-instructions">
+                <p>Теперь можно вводить цвета в любом формате:</p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Просто HEX-коды, разделенные пробелами: #111111 #ffffff #ff0000</li>
+                    <li><i class="fas fa-check"></i> HEX-коды, разделенные запятыми: #111, #fff, #f00</li>
+                    <li><i class="fas fa-check"></i> По одному на строку</li>
+                    <li><i class="fas fa-check"></i> С названиями: Синий: #3498db</li>
+                    <li><i class="fas fa-check"></i> Любая комбинация этих форматов</li>
+                </ul>
+            </div>
+            <p>Примеры правильных форматов:</p>
+            <div class="format-example">#111111 #ffffff #ff0000 #00ff00 #0000ff
+
+#111, #fff, #f00, #0f0, #00f
+
+Синий: #3498db
+Красный: #e74c3c
+Зеленый: #2ecc71
+Желтый: #f1c40f</div>
+            <p>Приложение автоматически определит формат и создаст палитру.</p>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">HEX-код скопирован в буфер обмена!</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorInput = document.getElementById('colorInput');
+            const processBtn = document.getElementById('processBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const colorsContainer = document.getElementById('colorsContainer');
+            const helpBtn = document.getElementById('helpBtn');
+            const helpModal = document.getElementById('helpModal');
+            const closeModal = document.getElementById('closeModal');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            // Обработка введенных данных
+            processBtn.addEventListener('click', function() {
+                const content = colorInput.value.trim();
+                if (content) {
+                    processInputContent(content);
+                } else {
+                    colorsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Пожалуйста, введите данные о цветах для обработки</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Очистка поля ввода
+            clearBtn.addEventListener('click', function() {
+                colorInput.value = '';
+                colorsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-palette"></i>
+                        <p>Введите данные о цветах и нажмите "Обновить палитру"</p>
+                    </div>
+                `;
+                colorInput.focus();
+            });
+            
+            // Улучшенный парсинг содержимого
+            function processInputContent(content) {
+                const colors = [];
+                
+                // Разделяем содержимое на строки
+                const lines = content.split('\n');
+                
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (line) {
+                        // Пытаемся разобрать строку в формате "Название: HEX-код"
+                        if (line.includes(':')) {
+                            const parts = line.split(':');
+                            if (parts.length >= 2) {
+                                const name = parts[0].trim();
+                                // Ищем HEX-код в оставшейся части строки
+                                const hexMatch = parts.slice(1).join(':').match(/#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\b/);
+                                if (hexMatch) {
+                                    colors.push({
+                                        name: name,
+                                        value: hexMatch[0]
+                                    });
+                                    return; // Переходим к следующей строке
+                                }
+                            }
+                        }
+                        
+                        // Если не нашли формат "Название: HEX", ищем HEX-коды в строке
+                        const hexCodes = line.match(/#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})\b/g);
+                        if (hexCodes) {
+                            hexCodes.forEach(hexCode => {
+                                colors.push({
+                                    name: hexCode,
+                                    value: hexCode
+                                });
+                            });
+                        }
+                    }
+                });
+                
+                displayColors(colors);
+            }
+            
+            // Отображение цветов
+            function displayColors(colors) {
+                if (colors.length === 0) {
+                    colorsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Не удалось распознать цвета. Проверьте формат данных.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                colorsContainer.innerHTML = '';
+                
+                colors.forEach((color, index) => {
+                    const colorElement = document.createElement('div');
+                    colorElement.className = 'color-item';
+                    colorElement.innerHTML = `
+                        <div class="color-box" style="background-color: ${color.value}">
+                            <button class="color-copy" data-value="${color.value}">
+                                <i class="fas fa-copy"></i> Копировать HEX
+                            </button>
+                        </div>
+                        <div class="color-info">
+                            <div class="color-name">${color.name || color.value}</div>
+                            <div class="color-value">${color.value}</div>
+                        </div>
+                    `;
+                    colorsContainer.appendChild(colorElement);
+                });
+                
+                // Добавляем обработчики для кнопок копирования
+                document.querySelectorAll('.color-copy').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const hexValue = this.getAttribute('data-value');
+                        copyToClipboard(hexValue);
+                        showNotification('HEX-код скопирован: ' + hexValue);
+                    });
+                });
+            }
+            
+            // Копирование в буфер обмена
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+            
+            // Показать уведомление
+            function showNotification(message) {
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Модальное окно помощи
+            helpBtn.addEventListener('click', function() {
+                helpModal.classList.add('active');
+            });
+            
+            closeModal.addEventListener('click', function() {
+                helpModal.classList.remove('active');
+            });
+            
+            // Закрытие модального окна при клике вне его
+            window.addEventListener('click', function(e) {
+                if (e.target === helpModal) {
+                    helpModal.classList.remove('active');
+                }
+            });
+            
+            // Пример данных при загрузке
+            colorInput.value = `#111111 #3498db #e74c3c #2ecc71 #f1c40f
+#9b59b6 #1abc9c #e67e22
+#34495e #ecf0f1 #95a5a6`;
+            
+            // Автоматически обрабатываем пример при загрузке
+            setTimeout(() => {
+                processBtn.click();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
